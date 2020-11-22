@@ -540,7 +540,7 @@ void mmu_command(MmuCmd cmd)
 void mmu_load_step(bool synchronize)
 {
 		current_position[E_AXIS] = current_position[E_AXIS] + MMU_LOAD_FEEDRATE * 0.1;
-		plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE, active_extruder);
+		plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE);
 		if (synchronize) st_synchronize();
 }
 
@@ -605,7 +605,7 @@ bool mmu_get_response(uint8_t move)
 				    {
                         printf_P(PSTR("Unload 1\n"));
                         current_position[E_AXIS] = current_position[E_AXIS] - MMU_LOAD_FEEDRATE * MMU_LOAD_TIME_MS*0.001;
-                        plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE, active_extruder);
+                        plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE);
                         st_synchronize();
 				    }
 				}
@@ -623,7 +623,7 @@ bool mmu_get_response(uint8_t move)
                     {
                         printf_P(PSTR("Unload 2\n"));
                         current_position[E_AXIS] = current_position[E_AXIS] - MMU_LOAD_FEEDRATE * MMU_LOAD_TIME_MS*0.001;
-                        plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE, active_extruder);
+                        plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE);
                         st_synchronize();
                     }
 				}
@@ -701,13 +701,13 @@ void manage_response(bool move_axes, bool turn_off_nozzle, uint8_t move)
 					  //lift z
 					  current_position[Z_AXIS] += Z_PAUSE_LIFT;
 					  if (current_position[Z_AXIS] > Z_MAX_POS) current_position[Z_AXIS] = Z_MAX_POS;
-					  plan_buffer_line_curposXYZE(15, active_extruder);
+					  plan_buffer_line_curposXYZE(15);
 					  st_synchronize();
 					  					  
 					  //Move XY to side
 					  current_position[X_AXIS] = X_PAUSE_POS;
 					  current_position[Y_AXIS] = Y_PAUSE_POS;
-					  plan_buffer_line_curposXYZE(50, active_extruder);
+					  plan_buffer_line_curposXYZE(50);
 					  st_synchronize();
 				  }
 				  if (turn_off_nozzle) {
@@ -758,17 +758,17 @@ void manage_response(bool move_axes, bool turn_off_nozzle, uint8_t move)
 					lcd_display_message_fullscreen_P(_i("MMU OK. Resuming temperature..."));
 					delay_keep_alive(3000);
 				}
-                mmu_wait_for_heater_blocking();
+				mmu_wait_for_heater_blocking();
 			  }			  
 			  if (move_axes) {
 				  lcd_clear();
 				  lcd_display_message_fullscreen_P(_i("MMU OK. Resuming position..."));
 				  current_position[X_AXIS] = x_position_bckp;
 				  current_position[Y_AXIS] = y_position_bckp;
-				  plan_buffer_line_curposXYZE(50, active_extruder);
+				  plan_buffer_line_curposXYZE(50);
 				  st_synchronize();
 				  current_position[Z_AXIS] = z_position_bckp;
-				  plan_buffer_line_curposXYZE(15, active_extruder);
+				  plan_buffer_line_curposXYZE(15);
 				  st_synchronize();
 			  }
 			  else {
@@ -807,79 +807,77 @@ void mmu_load_to_nozzle()
 		current_position[E_AXIS] += 7.2f;
 	}
     float feedrate = 562;
-	plan_buffer_line_curposXYZE(feedrate / 60, active_extruder);
+	plan_buffer_line_curposXYZE(feedrate / 60);
     st_synchronize();
 
-#ifdef BONDTECH_MK25S                                                         
+  #ifdef BONDTECH_MK25S
     current_position[E_AXIS] += 25.4f; //Bondtech MK2.5s 11 mm longer t melt zone
-#elif defined(BONDTECH_MK3S)                                                  
-    current_position[E_AXIS] += 25.4f; //Bondtech MK3s 11 mm longer t melt zone 
-#elif defined(BONDTECH_MOSQUITO)                                              
+  #elif defined(BONDTECH_MK3S)
+    current_position[E_AXIS] += 25.4f; //Bondtech MK3s 11 mm longer t melt zone
+  #elif defined(BONDTECH_MOSQUITO)
     current_position[E_AXIS] += 23.4f; //Bondtech Mosquito 9 mm longer t melt zone
-#elif defined(BONDTECH_MOSQUITO_MAGNUM)                                       
+  #elif defined(BONDTECH_MOSQUITO_MAGNUM)
     current_position[E_AXIS] += 18.4f; //Bondtech Mosquito Magnum 5 mm longer t melt zone
-#else                                                                         
-    current_position[E_AXIS] += 14.4f;                                         
-#endif
-    
-    feedrate = 871;
-    plan_buffer_line_curposXYZE(feedrate / 60, active_extruder);
+  #else
+	 current_position[E_AXIS] += 14.4f;
+  #endif
+	feedrate = 871;
+	plan_buffer_line_curposXYZE(feedrate / 60);
     st_synchronize();
-    current_position[E_AXIS] += 36.0f;
-    feedrate = 1393;
-    plan_buffer_line_curposXYZE(feedrate / 60, active_extruder);
+	current_position[E_AXIS] += 36.0f;
+	feedrate = 1393;
+	plan_buffer_line_curposXYZE(feedrate / 60);
     st_synchronize();
 
-    //Distance through heat block is longer with Mosquito / Mosquito Magnum         
-#ifdef BONDTECH_MOSQUITO                                                      
+//Distance through heat block is longer with Mosquito / Mosquito Magnum
+  #ifdef BONDTECH_MOSQUITO
     current_position[E_AXIS] += 16.4f; //2mm further through Mosquito heat block
-#elif defined(BONDTECH_MOSQUITO_MAGNUM)                                       
+  #elif defined(BONDTECH_MOSQUITO_MAGNUM)
     current_position[E_AXIS] += 21.4f; //7mm further through Mosquito Magnum heat block
-#else                                                                         
-    current_position[E_AXIS] += 14.4f;                                        
-#endif
-
-    feedrate = 871;
-    plan_buffer_line_curposXYZE(feedrate / 60, active_extruder);
+  #else
+	  current_position[E_AXIS] += 14.4f;
+  #endif
+	feedrate = 871;
+	plan_buffer_line_curposXYZE(feedrate / 60);
     st_synchronize();
-    if (!saved_e_relative_mode) axis_relative_modes &= ~E_AXIS_MASK;
+	if (!saved_e_relative_mode) axis_relative_modes &= ~E_AXIS_MASK;
 }
 
 void mmu_M600_wait_and_beep() {
-    //Beep and wait for user to remove old filament and prepare new filament for load
+		//Beep and wait for user to remove old filament and prepare new filament for load
 
-    KEEPALIVE_STATE(PAUSED_FOR_USER);
+		KEEPALIVE_STATE(PAUSED_FOR_USER);
 
-    int counterBeep = 0;
-    lcd_display_message_fullscreen_P(_i("Remove old filament and press the knob to start loading new filament.")); ////MSG_REMOVE_OLD_FILAMENT c=20 r=5
-    bool bFirst=true;
+		int counterBeep = 0;
+		lcd_display_message_fullscreen_P(_i("Remove old filament and press the knob to start loading new filament.")); ////MSG_REMOVE_OLD_FILAMENT c=20 r=5
+		bool bFirst=true;
 
-    while (!lcd_clicked()){
-        manage_heater();
-        manage_inactivity(true);
+		while (!lcd_clicked()){
+			manage_heater();
+			manage_inactivity(true);
 
-#if BEEPER > 0
-        if (counterBeep == 500) {
-            counterBeep = 0;
-        }
-        SET_OUTPUT(BEEPER);
-        if (counterBeep == 0) {
-            if((eSoundMode==e_SOUND_MODE_BLIND)|| (eSoundMode==e_SOUND_MODE_LOUD)||((eSoundMode==e_SOUND_MODE_ONCE)&&bFirst))
-            {
-                bFirst=false;
-                WRITE(BEEPER, HIGH);
-            }
-        }
-        if (counterBeep == 20) {
-            WRITE(BEEPER, LOW);
-        }
+			#if BEEPER > 0
+			if (counterBeep == 500) {
+				counterBeep = 0;
+			}
+			SET_OUTPUT(BEEPER);
+			if (counterBeep == 0) {
+				if((eSoundMode==e_SOUND_MODE_BLIND)|| (eSoundMode==e_SOUND_MODE_LOUD)||((eSoundMode==e_SOUND_MODE_ONCE)&&bFirst))
+				{
+					bFirst=false;
+					WRITE(BEEPER, HIGH);
+				}
+			}
+			if (counterBeep == 20) {
+				WRITE(BEEPER, LOW);
+			}
+				
+			counterBeep++;
+			#endif //BEEPER > 0
 
-        counterBeep++;
-#endif //BEEPER > 0
-
-        delay_keep_alive(4);
-    }
-    WRITE(BEEPER, LOW);
+			delay_keep_alive(4);
+		}
+		WRITE(BEEPER, LOW);
 }
 
 //! @brief load filament for mmu v2
@@ -889,10 +887,10 @@ void mmu_M600_load_filament(bool automatic, float nozzle_temp)
     tmp_extruder = mmu_extruder;
     if (!automatic)
     {
-#ifdef MMU_M600_SWITCH_EXTRUDER
+    #ifdef MMU_M600_SWITCH_EXTRUDER
         bool yes = lcd_show_fullscreen_message_yes_no_and_wait_P(_i("Do you want to switch extruder?"), false);
         if(yes) tmp_extruder = choose_extruder_menu();
-#endif //MMU_M600_SWITCH_EXTRUDER
+    #endif //MMU_M600_SWITCH_EXTRUDER
     }
     else
     {
@@ -1093,7 +1091,7 @@ void mmu_filament_ramming()
     for(uint8_t i = 0; i < (sizeof(ramming_sequence)/sizeof(E_step));++i)
     {
         current_position[E_AXIS] += pgm_read_float(&(ramming_sequence[i].extrude));
-        plan_buffer_line_curposXYZE(pgm_read_float(&(ramming_sequence[i].feed_rate)), active_extruder);
+        plan_buffer_line_curposXYZE(pgm_read_float(&(ramming_sequence[i].feed_rate)));
         st_synchronize();
     }
 }
@@ -1466,33 +1464,31 @@ bFilamentAction=false;                            // NOT in "mmu_fil_eject_menu(
 //! @retval false Doesn't fit
 static bool can_load()
 {
-#ifdef BONDTECH_MK25S //feed to melt zone                                   
-    current_position[E_AXIS] += 71; //Bondtech_V6 71mm from drive gear to melt zone
-#elif defined(BONDTECH_MK3S)                                                
-    current_position[E_AXIS] += 71; //Bondtech_V6 71mm from drive gear to melt zone
-#elif defined(BONDTECH_MOSQUITO)                                            
-    current_position[E_AXIS] += 70; //Bondtech_Mosquito 70mm from drive gear to melt zone
-#elif defined(BONDTECH_MOSQUITO_MAGNUM)                                     
-    current_position[E_AXIS] += 62; //Bondtech_Mosquito_Magnum 62mm from drive gear to melt zone
-#else                                                                       
-    current_position[E_AXIS] += 60;                                           
-#endif
+    #ifdef BONDTECH_MK25S //feed to melt zone
+      current_position[E_AXIS] += 71; //Bondtech_V6 71mm from drive gear to melt zone
+    #elif defined(BONDTECH_MK3S)
+      current_position[E_AXIS] += 71; //Bondtech_V6 71mm from drive gear to melt zone
+    #elif defined(BONDTECH_MOSQUITO)
+      current_position[E_AXIS] += 70; //Bondtech_Mosquito 70mm from drive gear to melt zone
+    #elif defined(BONDTECH_MOSQUITO_MAGNUM)
+      current_position[E_AXIS] += 62; //Bondtech_Mosquito_Magnum 62mm from drive gear to melt zone
+    #else
+      current_position[E_AXIS] += 60;
+    #endif
+    plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE);
 
-    plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE, active_extruder);
-    
-#ifdef BONDTECH_MK25S//pull back to 8 mm below drive gear to check if filament path was blocked
-    current_position[E_AXIS] -= 63; // Pull back 63mm, 8 mm below drive gear  
-#elif defined(BONDTECH_MK3S)                                                
-    current_position[E_AXIS] -= 63; // Pull back 63mm, 8 mm below drive gear  
-#elif defined(BONDTECH_MOSQUITO)                                            
-    current_position[E_AXIS] -= 62; // Pull back 62mm, 8 mm below drive gear  
-#elif defined(BONDTECH_MOSQUITO_MAGNUM)                                     
-    current_position[E_AXIS] -= 54; // Pull back 54mm, 8 mm below drive gear  
-#else                                                                       
-    current_position[E_AXIS] -= 52;                                           
-#endif
-
-    plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE, active_extruder);
+    #ifdef BONDTECH_MK25S//pull back to 8 mm below drive gear to check if filament path was blocked
+      current_position[E_AXIS] -= 63; // Pull back 63mm, 8 mm below drive gear
+    #elif defined(BONDTECH_MK3S)
+      current_position[E_AXIS] -= 63; // Pull back 63mm, 8 mm below drive gear
+    #elif defined(BONDTECH_MOSQUITO)
+      current_position[E_AXIS] -= 62; // Pull back 62mm, 8 mm below drive gear
+    #elif defined(BONDTECH_MOSQUITO_MAGNUM)
+      current_position[E_AXIS] -= 54; // Pull back 54mm, 8 mm below drive gear
+    #else
+      current_position[E_AXIS] -= 52;
+    #endif
+        plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE);
     st_synchronize();
 
     uint_least8_t filament_detected_count = 0;
@@ -1502,7 +1498,7 @@ static bool can_load()
     for(uint_least8_t i = 0; i < steps; ++i)
     {
         current_position[E_AXIS] -= e_increment;
-        plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE, active_extruder);
+        plan_buffer_line_curposXYZE(MMU_LOAD_FEEDRATE);
         st_synchronize();
         if(0 == PIN_GET(IR_SENSOR_PIN))
         {

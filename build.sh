@@ -28,10 +28,6 @@ fi
 cd Prusa-Firmware-build || exit 7
 BUILD_PATH="$( pwd -P )"
 
-if [ ! -e "$SCRIPT_PATH/Firmware/Configuration_prusa.h" ]; then
-    echo "$SCRIPT_PATH/Firmware/Configuration_prusa.h not found - create a symlink"
-fi
-
 $BUILD_ENV_PATH/arduino $SCRIPT_PATH/Firmware/Firmware.ino --verify --board PrusaResearchRambo:avr:rambo --pref build.path=$BUILD_PATH --pref compiler.warning_level=all || exit 9
 
 export ARDUINO=$BUILD_ENV_PATH
